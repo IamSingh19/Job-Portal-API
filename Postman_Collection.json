@@ -1,0 +1,373 @@
+{
+  "info": {
+    "name": "Job Portal API",
+    "_postman_id": "job-portal-api-collection",
+    "description": "Complete Postman collection for the Job Portal Backend API built with FastAPI.\n\n**Setup:**\n1. Set the `base_url` variable to your server (default: `http://localhost:8000/api/v1`)\n2. Register a user, login, and the access token will auto-populate via the test script.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api/v1", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "refresh_token", "value": "", "type": "string" },
+    { "key": "job_id", "value": "1", "type": "string" },
+    { "key": "application_id", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register - Job Seeker",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"seeker@example.com\",\n  \"full_name\": \"John Doe\",\n  \"password\": \"password123\",\n  \"role\": \"seeker\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"email\": \"seeker@example.com\",\n  \"full_name\": \"John Doe\",\n  \"role\": \"seeker\",\n  \"phone\": null,\n  \"bio\": null,\n  \"resume_url\": null,\n  \"company_name\": null,\n  \"is_active\": true,\n  \"created_at\": \"2024-01-15T10:30:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register - Recruiter",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"recruiter@techcorp.com\",\n  \"full_name\": \"Jane Smith\",\n  \"password\": \"password123\",\n  \"role\": \"recruiter\",\n  \"company_name\": \"TechCorp Inc.\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 2,\n  \"email\": \"recruiter@techcorp.com\",\n  \"full_name\": \"Jane Smith\",\n  \"role\": \"recruiter\",\n  \"company_name\": \"TechCorp Inc.\",\n  \"is_active\": true,\n  \"created_at\": \"2024-01-15T10:31:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.access_token) {",
+                  "  pm.collectionVariables.set('access_token', json.access_token);",
+                  "  pm.collectionVariables.set('refresh_token', json.refresh_token);",
+                  "  console.log('Tokens saved to collection variables');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"seeker@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"token_type\": \"bearer\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/users/me"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"id\": 1,\n  \"email\": \"seeker@example.com\",\n  \"full_name\": \"John Doe\",\n  \"role\": \"seeker\",\n  \"phone\": null,\n  \"bio\": null,\n  \"resume_url\": null,\n  \"is_active\": true,\n  \"created_at\": \"2024-01-15T10:30:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/users/me",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"John Doe Updated\",\n  \"phone\": \"+1-555-0100\",\n  \"bio\": \"Experienced software developer looking for new opportunities.\",\n  \"resume_url\": \"https://drive.google.com/file/d/abc123/view\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💼 Jobs",
+      "item": [
+        {
+          "name": "Create Job (Recruiter)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('job_id', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/jobs",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Python Developer\",\n  \"description\": \"We are looking for a skilled Python developer with FastAPI experience.\",\n  \"location\": \"San Francisco, CA\",\n  \"salary_min\": 120000,\n  \"salary_max\": 180000,\n  \"job_type\": \"full_time\",\n  \"experience_level\": \"senior\",\n  \"skills_required\": \"Python, FastAPI, PostgreSQL, Docker, AWS\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Senior Python Developer\",\n  \"description\": \"We are looking for a skilled Python developer...\",\n  \"location\": \"San Francisco, CA\",\n  \"salary_min\": \"120000.00\",\n  \"salary_max\": \"180000.00\",\n  \"job_type\": \"full_time\",\n  \"experience_level\": \"senior\",\n  \"skills_required\": \"Python, FastAPI, PostgreSQL, Docker, AWS\",\n  \"is_active\": true,\n  \"recruiter_id\": 2,\n  \"created_at\": \"2024-01-15T10:35:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Jobs (Search + Paginate)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/jobs?search=python&location=san francisco&page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["jobs"],
+              "query": [
+                { "key": "search", "value": "python" },
+                { "key": "location", "value": "san francisco" },
+                { "key": "job_type", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "page_size", "value": "10" }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"total\": 1,\n  \"page\": 1,\n  \"page_size\": 10,\n  \"items\": [\n    {\n      \"id\": 1,\n      \"title\": \"Senior Python Developer\",\n      \"location\": \"San Francisco, CA\",\n      ...\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Job by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/jobs/{{job_id}}"
+          }
+        },
+        {
+          "name": "Update Job (Recruiter)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/jobs/{{job_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"salary_max\": 200000,\n  \"is_active\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Job (Recruiter)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/jobs/{{job_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📥 Applications",
+      "item": [
+        {
+          "name": "Apply to Job (Seeker)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('application_id', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/applications/{{job_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cover_letter\": \"I am very excited about this opportunity and believe my 5 years of Python experience makes me an excellent candidate.\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"job_id\": 1,\n  \"applicant_id\": 1,\n  \"cover_letter\": \"I am very excited...\",\n  \"status\": \"pending\",\n  \"created_at\": \"2024-01-15T11:00:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "My Applications (Seeker)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/applications/me"
+          }
+        },
+        {
+          "name": "Job Applicants (Recruiter)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/applications/job/{{job_id}}"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"total\": 1,\n  \"items\": [\n    {\n      \"id\": 1,\n      \"job_id\": 1,\n      \"applicant_id\": 1,\n      \"cover_letter\": \"...\",\n      \"status\": \"pending\",\n      \"applicant\": { \"id\": 1, \"full_name\": \"John Doe\", \"email\": \"seeker@example.com\" }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Application Status (Recruiter)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/applications/{{application_id}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shortlisted\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔖 Bookmarks",
+      "item": [
+        {
+          "name": "Toggle Bookmark (Seeker)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/bookmarks/{{job_id}}"
+          },
+          "response": [
+            {
+              "name": "200 Added",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"action\": \"added\",\n  \"job_id\": 1\n}"
+            },
+            {
+              "name": "200 Removed",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"action\": \"removed\",\n  \"job_id\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "My Bookmarks (Seeker)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/bookmarks"
+          }
+        }
+      ]
+    },
+    {
+      "name": "❤️ Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8000/health"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"ok\",\n  \"version\": \"1.0.0\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

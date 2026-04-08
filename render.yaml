@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: job-portal-api
+    env: python
+    pythonVersion: "3.11"
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_NAME
+        value: Job Portal API
+      - key: DEBUG
+        value: false
+      - key: DATABASE_URL
+        sync: false   # Set manually in Render dashboard
+      - key: SECRET_KEY
+        generateValue: true
+      - key: REFRESH_SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: 7
+      - key: ALLOWED_ORIGINS
+        sync: false   # Set your frontend URL manually, e.g. https://your-app.vercel.app
